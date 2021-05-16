@@ -7,4 +7,6 @@ target 'SearchBarDemo' do
 
   # Pods for SearchBarDemo
 
+  pod 'SnapKit'
+
 end
