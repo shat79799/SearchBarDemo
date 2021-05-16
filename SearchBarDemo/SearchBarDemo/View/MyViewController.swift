@@ -11,6 +11,18 @@ import SnapKit
 class MyViewController: UIViewController, MyView {
     
     var presenter: MyPresenter?
+    let searchBar: UISearchBar = {
+        let s = UISearchBar()
+        
+        return s
+    }()
+    
+    let tableView: UITableView = {
+        let t = UITableView()
+        t.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        
+        return t
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,25 +30,30 @@ class MyViewController: UIViewController, MyView {
         
         presenter = MyPresenter(view: self)
         setupView()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
         presenter?.getPhotos()
     }
-
+    
     func setupView() {
-        let searchBar = UISearchBar()
         searchBar.delegate = self
         navigationItem.titleView = searchBar
         
-        let tableView = UITableView()
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
 
+    func updatePhotos(photos: [Photo]) {
+        tableView.reloadData()
+    }
+    
 }
 
 extension MyViewController: UITableViewDataSource {
@@ -45,11 +62,15 @@ extension MyViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return presenter?.photos.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        
+        if let photos = presenter?.photos {
+            cell.textLabel?.text = photos[indexPath.row].title
+        }
         
         return cell
     }
@@ -58,7 +79,10 @@ extension MyViewController: UITableViewDataSource {
 extension MyViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        print("click: \(indexPath.row)")
+        
+        if let photos = presenter?.photos {
+            print(photos[indexPath.row])
+        }
     }
 }
 

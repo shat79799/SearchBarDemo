@@ -8,7 +8,7 @@
 import Foundation
 
 protocol MyView {
-    
+    func updatePhotos(photos: [Photo])
 }
 
 protocol MyViewPresenter {
@@ -17,16 +17,19 @@ protocol MyViewPresenter {
 }
 
 class MyPresenter: MyViewPresenter {
-    let view: MyView
+    private let view: MyView
+    private(set) var photos: [Photo]
     
     required init(view: MyView) {
         self.view = view
+        self.photos = []
     }
     
     func getPhotos() {
         APIManager.shared.getPhotosJSON { photos in
-            print("total: \(photos.count), test: \(photos[0])")
+            self.updatePhotos(photos: photos)
         } onError: { error in
+            self.updatePhotos(photos: [])
             guard let error = error else {
                 //parse failed
                 print("parse data failed")
@@ -34,6 +37,10 @@ class MyPresenter: MyViewPresenter {
             }
             print("network error: \(error)")
         }
-
+    }
+    
+    private func updatePhotos(photos: [Photo]) {
+        self.photos = photos
+        self.view.updatePhotos(photos: photos)
     }
 }
