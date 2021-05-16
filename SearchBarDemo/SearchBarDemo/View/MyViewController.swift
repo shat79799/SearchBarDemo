@@ -19,6 +19,7 @@ class MyViewController: UIViewController, MyView {
     
     let tableView: UITableView = {
         let t = UITableView()
+        t.keyboardDismissMode = .onDrag
         t.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         return t
@@ -50,7 +51,7 @@ class MyViewController: UIViewController, MyView {
         }
     }
 
-    func updatePhotos(photos: [Photo]) {
+    func updatePhotos() {
         tableView.reloadData()
     }
     
@@ -62,14 +63,26 @@ extension MyViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter?.photos.count ?? 0
+        if let searchText = searchBar.text,
+           searchText.count > 0 {
+            return presenter?.filteredPhotos.count ?? 0
+        } else {
+            return presenter?.photos.count ?? 0
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
-        if let photos = presenter?.photos {
-            cell.textLabel?.text = photos[indexPath.row].title
+        if let searchText = searchBar.text,
+           searchText.count > 0 {
+            if let filtered = presenter?.filteredPhotos {
+                cell.textLabel?.text = filtered[indexPath.row].title
+            }
+        } else {
+            if let photos = presenter?.photos {
+                cell.textLabel?.text = photos[indexPath.row].title
+            }
         }
         
         return cell
@@ -79,13 +92,30 @@ extension MyViewController: UITableViewDataSource {
 extension MyViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        self.searchBar.endEditing(true)
         
-        if let photos = presenter?.photos {
-            print(photos[indexPath.row])
+        if let searchText = searchBar.text,
+           searchText.count > 0 {
+            if let filtered = presenter?.filteredPhotos {
+                print(filtered[indexPath.row])
+            }
+        } else {
+            if let photos = presenter?.photos {
+                print(photos[indexPath.row])
+            }
         }
     }
 }
 
 extension MyViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.count == 0 {
+            presenter?.searchTitle(title: nil)
+        }
+    }
     
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        presenter?.searchTitle(title: searchBar.text)
+    }
 }

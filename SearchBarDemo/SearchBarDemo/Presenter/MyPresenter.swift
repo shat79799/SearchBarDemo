@@ -8,21 +8,24 @@
 import Foundation
 
 protocol MyView {
-    func updatePhotos(photos: [Photo])
+    func updatePhotos()
 }
 
 protocol MyViewPresenter {
     init(view: MyView)
     func getPhotos()
+    func searchTitle(title: String?)
 }
 
 class MyPresenter: MyViewPresenter {
     private let view: MyView
     private(set) var photos: [Photo]
+    private(set) var filteredPhotos: [Photo]
     
     required init(view: MyView) {
         self.view = view
         self.photos = []
+        self.filteredPhotos = []
     }
     
     func getPhotos() {
@@ -31,7 +34,6 @@ class MyPresenter: MyViewPresenter {
         } onError: { error in
             self.updatePhotos(photos: [])
             guard let error = error else {
-                //parse failed
                 print("parse data failed")
                 return
             }
@@ -41,6 +43,17 @@ class MyPresenter: MyViewPresenter {
     
     private func updatePhotos(photos: [Photo]) {
         self.photos = photos
-        self.view.updatePhotos(photos: photos)
+        self.view.updatePhotos()
+    }
+    
+    func searchTitle(title: String?) {
+        guard let searchText = title else {
+            filteredPhotos = []
+            self.view.updatePhotos()
+            return
+        }
+        let result = self.photos.filter({ $0.title.contains(searchText) })
+        self.filteredPhotos = result
+        self.view.updatePhotos()
     }
 }
