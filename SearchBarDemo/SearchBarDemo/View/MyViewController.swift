@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  MyViewController.swift
 //  SearchBarDemo
 //
 //  Created by Stan Liu on 2021/5/16.
@@ -8,13 +8,18 @@
 import UIKit
 import SnapKit
 
-class ViewController: UIViewController {
+class MyViewController: UIViewController, MyView {
+    
+    var presenter: MyPresenter?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        presenter = MyPresenter(view: self)
         setupView()
+        
+        presenter?.getPhotos()
     }
 
     func setupView() {
@@ -31,9 +36,10 @@ class ViewController: UIViewController {
             make.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
+
 }
 
-extension ViewController: UITableViewDataSource {
+extension MyViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -49,13 +55,13 @@ extension ViewController: UITableViewDataSource {
     }
 }
 
-extension ViewController: UITableViewDelegate {
+extension MyViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         print("click: \(indexPath.row)")
     }
 }
 
-extension ViewController: UISearchBarDelegate {
+extension MyViewController: UISearchBarDelegate {
     
 }
