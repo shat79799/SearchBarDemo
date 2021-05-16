@@ -8,5 +8,6 @@ target 'SearchBarDemo' do
   # Pods for SearchBarDemo
 
   pod 'SnapKit'
+  pod 'Alamofire'
 
 end
