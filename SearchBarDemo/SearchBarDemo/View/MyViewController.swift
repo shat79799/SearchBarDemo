@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Kingfisher
 
 class MyViewController: UIViewController, MyView {
     
@@ -19,8 +20,10 @@ class MyViewController: UIViewController, MyView {
     
     let tableView: UITableView = {
         let t = UITableView()
+        t.rowHeight = UITableView.automaticDimension
+        t.estimatedRowHeight = 200
         t.keyboardDismissMode = .onDrag
-        t.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        t.register(MyTableViewCell.self, forCellReuseIdentifier: "cell")
         
         return t
     }()
@@ -72,16 +75,22 @@ extension MyViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell: MyTableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! MyTableViewCell
         
         if let searchText = searchBar.text,
            searchText.count > 0 {
             if let filtered = presenter?.filteredPhotos {
-                cell.textLabel?.text = filtered[indexPath.row].title
+                let target = filtered[indexPath.row]
+                cell.titleLb.text = target.title
+                cell.imgView.kf.indicatorType = .activity
+                cell.imgView.kf.setImage(with: URL(string: target.thumbnailUrl))
             }
         } else {
             if let photos = presenter?.photos {
-                cell.textLabel?.text = photos[indexPath.row].title
+                let target = photos[indexPath.row]
+                cell.titleLb.text = target.title
+                cell.imgView.kf.indicatorType = .activity
+                cell.imgView.kf.setImage(with: URL(string: target.thumbnailUrl))
             }
         }
         
